@@ -1,27 +1,33 @@
 FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
+AUTH_BINARY=authApp
 
 up:
 	@echo "Starting Docker images..."
-	sudo docker-compose up -d
+	docker-compose up -d
 	@echo "Docker images started!"
 
-up_build: build_broker
+up_build: build_broker build_auth
 	@echo "Stopping docker images (if running)..."
-	sudo docker-compose down
+	docker-compose down
 	@echo "Building (when required) and starting docker images..."
-	sudo docker-compose up --build -d
+	docker-compose up --build -d
 	@echo "Docker images built and started!"
 
 down:
 	@echo "Stopping docker compose..."
-	sudo docker-compose down
+	docker-compose down
 	@echo "Done!"
 
-build_broker:
-	@echo "Building broker binary..."
+build_broker: 
+	@echo "building broker binary..."
 	cd ../broker-service && env GOOS=linux CGO_ENABLED=0 go build -o ${BROKER_BINARY} ./cmd/api
-	@echo "Done!"
+	@echo "done!"
+
+build_auth:
+	@echo "building authentication binary..."
+	cd ../authentication-service && env GOOS=linux CGO_ENABLED=0 go build -o ${AUTH_BINARY} ./cmd/api
+	@echo "done!"
 
 build_front:
 	@echo "Building front end binary..."
