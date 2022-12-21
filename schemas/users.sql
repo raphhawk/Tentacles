@@ -1,3 +1,4 @@
+-- psql -h localhost -U postgres
 CREATE SEQUENCE public.user_id_seq
   START WITH 1
   INCREMENT BY 1
