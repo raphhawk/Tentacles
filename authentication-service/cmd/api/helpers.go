@@ -31,7 +31,6 @@ func (app *Config) readJSON(
 	if err != io.EOF {
 		return errors.New("body must have only a single JSON value")
 	}
-
 	return nil
 }
 
