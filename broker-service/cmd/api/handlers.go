@@ -46,7 +46,7 @@ func (app *Config) authenticate(
     app.errorJSON(w, err)
     return
   }
-
+  // get the response
   client := &http.Client{}
   response, err := client.Do(request)
   if err != nil {
@@ -92,12 +92,13 @@ func (app *Config) HandleSubmission(
 
 	err := app.readJSON(w, r, &requestPayload)
 	if err != nil {
-		app.errorJSON(err)
+		app.errorJSON(w, err)
 		return
 	}
 
 	switch requestPayload.Action {
 	case "auth":
+    app.authenticate(w, requestPayload.Auth)
 	default:
 		app.errorJSON(w, errors.New("unknown action"))
 	}
