@@ -1,0 +1,8 @@
+go 1.19
+
+use (
+	./authentication-service
+	./broker-service
+	./front-end
+	./logger-service
+)
