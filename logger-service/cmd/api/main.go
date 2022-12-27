@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"time"
 
+	"github.com/raphhawk/log-service/data"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	port     = "80"
+	webPort  = "80"
 	rpcPort  = "5001"
 	mongoUrl = "mongodb://mongo:27017"
 	grpcPort = "50001"
@@ -18,7 +21,9 @@ const (
 
 var client *mongo.Client
 
-type Config struct{}
+type Config struct {
+	Models data.Models
+}
 
 func connectToMongo() (*mongo.Client, error) {
 	// create connection options
@@ -35,6 +40,18 @@ func connectToMongo() (*mongo.Client, error) {
 		return nil, err
 	}
 	return c, nil
+}
+
+func (app *Config) serve() {
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
+	}
+
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Panic()
+	}
 }
 
 func main() {
@@ -55,4 +72,11 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	app := Config{
+		Models: data.New(client),
+	}
+
+	// start server
+	go app.serve()
 }
