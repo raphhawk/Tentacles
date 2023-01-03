@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/vanng822/go-premailer/premailer"
-	mail "github.com/xhit/go-simple-mail"
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 type Mail struct {
