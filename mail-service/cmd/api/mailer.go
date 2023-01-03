@@ -38,6 +38,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	}
 
 	formattedMessage := tpl.String()
+	return "", nil
 }
 
 func (m *Mail) sendSMTPMessage(msg Message) error {
