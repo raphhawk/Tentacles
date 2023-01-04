@@ -2,13 +2,14 @@ FRONT_END_BINARY=frontApp
 BROKER_BINARY=brokerApp
 AUTH_BINARY=authApp
 LOGGER_BINARY=logApp
+MAILER_BINARY=mailApp
 
 up:
 	@echo "Starting Docker images..."
 	docker-compose up -d
 	@echo "Docker images started!"
 
-up_build: build_broker build_auth build_logger
+up_build: build_broker build_auth build_logger build_mailer
 	@echo "Stopping docker images (if running)..."
 	docker-compose down
 	@echo "Building (when required) and starting docker images..."
@@ -33,6 +34,11 @@ build_auth:
 build_logger:
 	@echo "building logger binary"
 	cd ../logger-service && env GOOS=linux CGO_ENABLED=0 go build -o ${LOGGER_BINARY} ./cmd/api
+	@echo "done!"
+
+build_mailer:
+	@echo "building mailer binary"
+	cd ../mail-service && env GOOS=linux CGO_ENABLED=0 go build -o ${MAILER_BINARY} ./cmd/api
 	@echo "done!"
 
 build_front:
