@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func (app *Config) SendMail(
 	w http.ResponseWriter,
@@ -29,6 +32,7 @@ func (app *Config) SendMail(
 
 	err = app.Mailer.sendSMTPMessage(msg)
 	if err != nil {
+		log.Println(err)
 		app.errorJSON(w, err)
 		return
 	}
