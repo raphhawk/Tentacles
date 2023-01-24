@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/raphhawk/broker/event"
 )
 
 func (app *Config) Broker(
@@ -35,6 +37,8 @@ type MailPayload struct {
 	Subject string `json:"subject"`
 	Message string `json:"message"`
 }
+
+type ListnerPayload struct{}
 
 type RequestPayload struct {
 	Action string      `json:"action"`
@@ -132,6 +136,40 @@ func (app *Config) logItem(
 	app.writeJSON(w, http.StatusAccepted, payload)
 }
 
+func (app *Config) pushToQueue(name, msg string) error {
+	emitter, err := event.NewEventEmitter(app.Rabbit)
+	if err != nil {
+		return err
+	}
+
+	payload := LogPayload{
+		Name: name,
+		Data: msg,
+	}
+
+	j, _ := json.MarshalIndent(payload, "", "\t")
+	err = emitter.Push(string(j), "log.INFO")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (app *Config) logEventViaRabbit(
+	w http.ResponseWriter,
+	l LogPayload,
+) {
+	err := app.pushToQueue(l.Name, l.Data)
+	if err != nil {
+		app.errorJSON(w, err)
+		return
+	}
+	var payload jsonResponse
+	payload.Error = false
+	payload.Message = "logged via RabbitMQ"
+	app.writeJSON(w, http.StatusAccepted, payload)
+}
+
 func (app *Config) SendMail(
 	w http.ResponseWriter,
 	msg MailPayload,
@@ -191,7 +229,9 @@ func (app *Config) HandleSubmission(
 	case "auth":
 		app.authenticate(w, requestPayload.Auth)
 	case "log":
-		app.logItem(w, requestPayload.Log)
+		//app.logItem(w, requestPayload.Log)
+		app.logEventViaRabbit(w, requestPayload.Log)
+
 	case "mail":
 		app.SendMail(w, requestPayload.Mail)
 	default:
